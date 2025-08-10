@@ -1,16 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guess Number</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body class="bg">
-<div style="background:rgba(255,255,255,0.85);padding:20px;border-radius:8px;">
-<h2>Guess Number</h2>
-<p>Game placeholder. Implement guess number here.</p>
-<button onclick="window.location.href='index.html'">Quit</button>
-</div>
-</body>
-</html>
+<html><head><title>Guess Game</title></head>
+<body><h2>Game: Guess the Number (1-100)</h2>
+<input type="number" id="guess" min="1" max="100"/>
+<button onclick="checkGuess()">Submit</button>
+<p id="result"></p><p>Time left: <span id="timer">60</span> seconds</p>
+<script>
+const answer = Math.floor(Math.random() * 100) + 1;
+let timeLeft = 60;
+const timer = setInterval(() => {
+  timeLeft--;
+  document.getElementById("timer").innerText = timeLeft;
+  if (timeLeft <= 0) {
+    clearInterval(timer);
+    document.getElementById("result").innerText = "⏰ Time's up! The number was " + answer;
+  }
+}, 1000);
+function checkGuess() {
+  const guess = parseInt(document.getElementById("guess").value);
+  if (guess === answer) {
+    clearInterval(timer);
+    document.getElementById("result").innerText = "🎉 Correct!";
+  } else if (guess < answer) {
+    document.getElementById("result").innerText = "🔼 Too Low!";
+  } else {
+    document.getElementById("result").innerText = "🔽 Too High!";
+  }
+}
+</script></body></html>
