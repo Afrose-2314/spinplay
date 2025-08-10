@@ -1,141 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Memory Match</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #e0f7fa;
-      margin: 0;
-      padding: 20px;
-    }
-    #board {
-      display: grid;
-      grid-template-columns: repeat(4, 100px);
-      gap: 10px;
-      justify-content: center;
-      margin: 30px auto;
-      user-select: none;
-    }
-    .card {
-      width: 100px;
-      height: 100px;
-      background-color: #ccc;
-      font-size: 2em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.3s;
-      border-radius: 10px;
-      pointer-events: auto;
-    }
-    .flipped {
-      background-color: #fff;
-    }
-    .matched {
-      background-color: #81c784;
-      cursor: default;
-      pointer-events: none;
-    }
-    .result {
-      font-size: 1.5em;
-      margin-top: 20px;
-    }
-    .winner {
-      animation: pulse 1s infinite;
-      color: green;
-    }
-    .loser {
-      animation: shake 0.5s infinite;
-      color: red;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Memory Match</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  #instructionOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    padding: 20px;
+    z-index: 1000;
+  }
+  #instructionOverlay button {
+    margin-top: 20px;
+    padding: 10px 30px;
+    font-size: 18px;
+    border-radius: 6px;
+    border: none;
+    background-color: #0984e3;
+    color: white;
+    cursor: pointer;
+  }
+  #instructionOverlay button:hover {
+    background-color: #0652dd;
+  }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(4, 100px);
+    gap: 10px;
+    justify-content: center;
+    margin: 30px auto;
+    user-select: none;
+  }
+  .card {
+    width: 100px;
+    height: 100px;
+    background-color: #ccc;
+    font-size: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s;
+    border-radius: 10px;
+  }
+  .flipped {
+    background-color: #fff;
+  }
+  .matched {
+    background-color: #81c784;
+    cursor: default;
+    pointer-events: none;
+  }
+  .result {
+    font-size: 1.5em;
+    margin-top: 20px;
+  }
+  .winner {
+    animation: pulse 1s infinite;
+    color: #2ecc71;
+  }
+  .loser {
+    animation: shake 0.5s infinite;
+    color: #e74c3c;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  #score, #timer {
+    font-weight: bold;
+    font-size: 20px;
+    color: white;
+  }
+</style>
 </head>
 <body>
-  <h2>🧠 Memory Match</h2>
-  <p>Match all pairs before time runs out!</p>
-  <div id="board"></div>
-  <p id="score">Matches: 0</p>
-  <p id="timer">⏳ Time: 60s</p>
-  <div class="result" id="resultText"></div>
 
-  <script>
-    const emojis = ['❤️','🩷','🧡','💛','💚','💙','🩵','💜','🤎','🖤','🩶','🤍'];
-    let cards = emojis.concat(emojis);
-    cards.sort(() => 0.5 - Math.random());
+<div id="instructionOverlay">
+  <p>Welcome to Memory Match!<br/>
+  Match all pairs before time runs out.<br/>
+  You have 60 seconds.<br/>
+  Good luck!</p>
+  <button id="startBtn">OK</button>
+</div>
 
-    let first = null, second = null, matched = 0, time = 60, gameEnded = false;
+<h2 style="color: white;">🧠 Memory Match</h2>
+<p style="color: white;">Match all pairs before time runs out!</p>
+<div id="board"></div>
+<p id="score">Matches: 0</p>
+<p id="timer">⏳ Time: 60s</p>
+<div class="result" id="resultText"></div>
 
-    const board = document.getElementById("board");
-    const scoreDisplay = document.getElementById("score");
-    const resultText = document.getElementById("resultText");
+<script>
+  const overlay = document.getElementById('instructionOverlay');
+  const startBtn = document.getElementById('startBtn');
+  const board = document.getElementById('board');
+  const scoreDisplay = document.getElementById('score');
+  const timerDisplay = document.getElementById('timer');
+  const resultText = document.getElementById('resultText');
 
-    // Create cards
-    cards.forEach((emoji, i) => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.dataset.emoji = emoji;
-      card.dataset.index = i;
-      card.innerText = "";
-      card.addEventListener("click", () => {
-        if (!gameEnded) flipCard(card);
-      });
-      board.appendChild(card);
-    });
-
-    function flipCard(card) {
-      if (card.classList.contains("flipped") || card.classList.contains("matched")) return;
-
-      card.classList.add("flipped");
-      card.innerText = card.dataset.emoji;
-
-      if (!first) {
-        first = card;
-      } else if (!second && card !== first) {
-        second = card;
-
-        if (first.dataset.emoji === second.dataset.emoji) {
-          first.classList.add("matched");
-          second.classList.add("matched");
-          matched++;
-          scoreDisplay.innerText = "Matches: " + matched;
-          first = second = null;
-
-          if (matched === emojis.length) endGame(true);
-        } else {
-          setTimeout(() => {
-            first.classList.remove("flipped");
-            second.classList.remove("flipped");
-            first.innerText = "";
-            second.innerText = "";
-            first = second = null;
-          }, 800);
-        }
-      }
-    }
-
-    function endGame(won) {
-      gameEnded = true;
-      clearInterval(timerInterval);
-      resultText.className = "result " + (won ? "winner" : "loser");
-      resultText.innerText = won ? "🎉 You Win!" : "😢 Time's up!";
-    }
-
-    const timerInterval = setInterval(() => {
-      document.getElementById("timer").innerText = "⏳ Time: " + time-- + "s";
-      if (time < 0) endGame(false);
-    }, 1000);
-  </script>
-</body>
-</html>
+  const emojis = ['🤍','🤎','💜','❤️','🩷','🧡','💛','💚','💙','🩵'];
+  let cards = emojis.concat(emojis);
+  let first = null, second
