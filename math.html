@@ -1,16 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Math Quiz</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body class="bg">
-<div style="background:rgba(255,255,255,0.85);padding:20px;border-radius:8px;">
-<h2>Math Quiz</h2>
-<p>Game placeholder. Implement math quiz here.</p>
-<button onclick="window.location.href='index.html'">Quit</button>
-</div>
-</body>
-</html>
+<html><head><title>Math Quiz</title></head>
+<body><h2>Game: Math Quiz</h2><p id="question"></p>
+<input type="text" id="answer" /><button onclick="check()">Submit</button>
+<p id="feedback"></p><p>Score: <span id="score">0</span></p><p>Time Left: <span id="time">60</span> seconds</p>
+<script>
+let num1, num2, operator, correctAnswer, score = 0, time = 60;
+const ops = ['+', '-', '*'];
+function generateQuestion() {
+  num1 = Math.floor(Math.random() * 10);
+  num2 = Math.floor(Math.random() * 10);
+  operator = ops[Math.floor(Math.random() * ops.length)];
+  correctAnswer = eval(num1 + operator + num2);
+  document.getElementById('question').innerText = `Solve: ${num1} ${operator} ${num2}`;
+  document.getElementById('answer').value = '';
+  document.getElementById('feedback').innerText = '';
+}
+function check() {
+  const userAns = parseInt(document.getElementById('answer').value);
+  if (userAns === correctAnswer) {
+    score++;
+    document.getElementById('score').innerText = score;
+    document.getElementById('feedback').innerText = "✅ Correct!";
+  } else {
+    document.getElementById('feedback').innerText = "❌ Incorrect!";
+  }
+  setTimeout(generateQuestion, 500);
+}
+const countdown = setInterval(() => {
+  time--;
+  document.getElementById('time').innerText = time;
+  if (time <= 0) {
+    clearInterval(countdown);
+    document.getElementById('question').innerText = "⏰ Time's up!";
+    document.getElementById('answer').disabled = true;
+  }
+}, 1000);
+window.onload = generateQuestion;
+</script></body></html>
