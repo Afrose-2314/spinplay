@@ -1,42 +1,86 @@
 <!DOCTYPE html>
-<html>
-<head><title>Color Match</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Color Match</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #buttons button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #timer {
+      font-weight: bold;
+      margin-top: 15px;
+    }
+  </style>
+</head>
 <body>
-<h2>Color Match</h2>
-<p>Click the color shown below!</p>
-<h3 id="targetColor"></h3>
-<div id="buttons"></div>
-<p id="score">Score: 0</p>
-<p id="timer"></p>
-<script>
-const colors = ["Red", "Blue", "Green", "Yellow", "Purple","Black","pink"];
-let score = 0, time = 45, target;
 
-function setColor() {
-  target = colors[Math.floor(Math.random() * colors.length)];
-  document.getElementById("targetColor").innerText = "Target: " + target;
-  let html = "";
-  colors.sort(() => 0.5 - Math.random()).forEach(color => {
-    html += `<button onclick="check('${color}')">${color}</button>`;
-  });
-  document.getElementById("buttons").innerHTML = html;
-}
+  <h2>Color Match</h2>
+  <p>Click the color shown below!</p>
+  <h3 id="targetColor">Target: </h3>
 
-function check(color) {
-  if (color === target) score++;
-  document.getElementById("score").innerText = "Score: " + score;
-  setColor();
-}
+  <div id="buttons"></div>
 
-setColor();
+  <p id="score">Score: 0</p>
+  <p id="timer">⏳ Time: 45s</p>
 
-let interval = setInterval(() => {
-  document.getElementById("timer").innerText = "⏳ Time: " + time-- + "s";
-  if (time < 0) {
-    clearInterval(interval);
-    alert("⏱️ Time's up! Your score: " + score);
-  }
-}, 1000);
-</script>
+  <script>
+    const colors = ["Red", "Blue", "Green", "Yellow", "Purple", "Black", "Pink"];
+    let score = 0;
+    let time = 45;
+    let target = "";
+
+    // Set a new target color and display shuffled buttons
+    function setColor() {
+      target = colors[Math.floor(Math.random() * colors.length)];
+      document.getElementById("targetColor").innerText = "Target: " + target;
+
+      // Shuffle colors
+      const shuffledColors = colors
+        .map(value => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value);
+
+      let buttonsHTML = "";
+      shuffledColors.forEach(color => {
+        buttonsHTML += `<button onclick="check('${color}')">${color}</button>`;
+      });
+      document.getElementById("buttons").innerHTML = buttonsHTML;
+    }
+
+    // Check if clicked color matches target
+    function check(color) {
+      if (color === target) {
+        score++;
+        document.getElementById("score").innerText = "Score: " + score;
+      }
+      setColor();
+    }
+
+    // Start game
+    setColor();
+
+    // Timer countdown
+    const timerInterval = setInterval(() => {
+      document.getElementById("timer").innerText = "⏳ Time: " + time + "s";
+      time--;
+
+      if (time < 0) {
+        clearInterval(timerInterval);
+        alert("⏱️ Time's up! Your score: " + score);
+        // Disable buttons after time up
+        document.getElementById("buttons").innerHTML = "";
+      }
+    }, 1000);
+  </script>
+
 </body>
 </html>
