@@ -1,113 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Math Quiz</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    #question {
-      font-size: 20px;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-    input[type="text"] {
-      padding: 5px;
-      font-size: 16px;
-      width: 100px;
-      text-align: center;
-    }
-    button {
-      padding: 6px 15px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-left: 5px;
-    }
-    #feedback {
-      margin-top: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      height: 24px; /* to avoid layout shift */
-    }
-    #score, #time {
-      font-weight: bold;
-      color: #2a9d8f;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Math Quiz</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+    /* Gradient background */
+    background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+    min-height: 100vh;
+    margin: 0;
+  }
+  #instructionOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 20px;
+    padding: 20px;
+    z-index: 1000;
+  }
+  #instructionOverlay button {
+    margin-top: 20px;
+    padding: 10px 25px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    background: #00b894;
+    color: white;
+    transition: background-color 0.3s;
+  }
+  #instructionOverlay button:hover {
+    background: #019875;
+  }
+  #question {
+    font-size: 24px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #fff;
+  }
+  input[type="text"] {
+    padding: 8px;
+    font-size: 18px;
+    width: 120px;
+    text-align: center;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+  }
+  button#submitBtn {
+    padding: 8px 20px;
+    font-size: 18px;
+    margin-left: 8px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background-color: #0984e3;
+    color: white;
+  }
+  button#submitBtn:hover {
+    background-color: #0652dd;
+  }
+  #feedback {
+    margin-top: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    height: 28px;
+    color: #dfe6e9;
+  }
+  #score, #time {
+    font-weight: bold;
+    font-size: 20px;
+    color: #dfe6e9;
+    margin-top: 15px;
+  }
+</style>
 </head>
 <body>
 
-  <h2>Game: Math Quiz</h2>
+<div id="instructionOverlay">
+  <p>Welcome to the Math Quiz!<br />
+  Solve as many simple math problems as you can in 60 seconds.<br />
+  Press Submit or Enter to check your answer.<br />
+  Good luck!</p>
+  <button onclick="startGame()">OK</button>
+</div>
 
-  <p id="question">Loading question...</p>
+<h2 style="color: white;">Game: Math Quiz</h2>
 
-  <input type="text" id="answer" autocomplete="off" />
-  <button onclick="checkAnswer()">Submit</button>
+<p id="question"></p>
 
-  <p id="feedback"></p>
+<input type="text" id="answer" autocomplete="off" />
+<button id="submitBtn">Submit</button>
 
-  <p>Score: <span id="score">0</span></p>
-  <p>Time Left: <span id="time">60</span> seconds</p>
+<p id="feedback"></p>
 
-  <script>
-    let num1, num2, operator, correctAnswer;
-    let score = 0;
-    let time = 60;
-    const ops = ['+', '-', '*'];
+<p id="score">Score: 0</p>
+<p id="time">Time Left: 60 seconds</p>
 
-    function generateQuestion() {
-      num1 = Math.floor(Math.random() * 10);
-      num2 = Math.floor(Math.random() * 10);
-      operator = ops[Math.floor(Math.random() * ops.length)];
+<script>
+  let num1, num2, operator, correctAnswer;
+  let score = 0;
+  let time = 60;
+  let gameStarted = false;
+  let countdown;
+  const ops = ['+', '-', '*'];
 
-      // Compute correct answer
-      switch(operator) {
-        case '+': correctAnswer = num1 + num2; break;
-        case '-': correctAnswer = num1 - num2; break;
-        case '*': correctAnswer = num1 * num2; break;
-      }
+  const questionEl = document.getElementById('question');
+  const answerInput = document.getElementById('answer');
+  const feedbackEl = document.getElementById('feedback');
+  const scoreEl = document.getElementById('score');
+  const timeEl = document.getElementById('time');
+  const submitBtn = document.getElementById('submitBtn');
+  const instructionOverlay = document.getElementById('instructionOverlay');
 
-      document.getElementById('question').innerText = `Solve: ${num1} ${operator} ${num2}`;
-      document.getElementById('answer').value = '';
-      document.getElementById('feedback').innerText = '';
-      document.getElementById('answer').focus();
+  // Generate a new math question
+  function generateQuestion() {
+    num1 = Math.floor(Math.random() * 10);
+    num2 = Math.floor(Math.random() * 10);
+    operator = ops[Math.floor(Math.random() * ops.length)];
+    switch(operator) {
+      case '+': correctAnswer = num1 + num2; break;
+      case '-': correctAnswer = num1 - num2; break;
+      case '*': correctAnswer = num1 * num2; break;
+    }
+    questionEl.innerText = `Solve: ${num1} ${operator} ${num2}`;
+    answerInput.value = '';
+    feedbackEl.innerText = '';
+    answerInput.focus();
+  }
+
+  // Check the user's answer
+  function checkAnswer() {
+    if (!gameStarted) return;
+
+    const userAns = parseInt(answerInput.value);
+    if (isNaN(userAns)) {
+      feedbackEl.innerText = "⚠️ Please enter a number";
+      return;
     }
 
-    function checkAnswer() {
-      const userAns = parseInt(document.getElementById('answer').value);
-      if (isNaN(userAns)) {
-        document.getElementById('feedback').innerText = "⚠️ Please enter a valid number.";
-        return;
-      }
-
-      if (userAns === correctAnswer) {
-        score++;
-        document.getElementById('score').innerText = score;
-        document.getElementById('feedback').innerText = "✅ Correct!";
-      } else {
-        document.getElementById('feedback').innerText = "❌ Incorrect!";
-      }
-
-      setTimeout(generateQuestion, 700);
+    if (userAns === correctAnswer) {
+      score++;
+      scoreEl.innerText = `Score: ${score}`;
+      feedbackEl.innerText = "✅ Correct!";
+    } else {
+      feedbackEl.innerText = "❌ Incorrect!";
     }
 
-    const countdown = setInterval(() => {
+    setTimeout(generateQuestion, 700);
+  }
+
+  // Handle Enter key press for answer submission
+  answerInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      checkAnswer();
+    }
+  });
+
+  submitBtn.addEventListener('click', checkAnswer);
+
+  // Start the game after instruction overlay OK clicked
+  function startGame() {
+    instructionOverlay.style.display = 'none';
+    gameStarted = true;
+    score = 0;
+    time = 60;
+    scoreEl.innerText = 'Score: 0';
+    timeEl.innerText = 'Time Left: 60 seconds';
+    generateQuestion();
+
+    countdown = setInterval(() => {
       time--;
-      document.getElementById('time').innerText = time;
+      timeEl.innerText = `Time Left: ${time} seconds`;
 
-      if (time <= 0) {
+      if (time < 0) {
         clearInterval(countdown);
-        document.getElementById('question').innerText = "⏰ Time's up!";
-        document.getElementById('answer').disabled = true;
-        document.getElementById('feedback').innerText = '';
+        gameStarted = false;
+        questionEl.innerText = "⏰ Time's up!";
+        feedbackEl.innerText = '';
+        answerInput.disabled = true;
+        submitBtn.disabled = true;
+
+        // After 10 seconds, go back to spinner or home page
+        setTimeout(() => {
+          goToSpinner();
+        }, 10000);
       }
     }, 1000);
 
-    window.onload = generateQuestion;
-  </script>
+    answerInput.disabled = false;
+    submitBtn.disabled = false;
+  }
+
+  // Replace this with actual navigation to spinner page in your project
+  function goToSpinner() {
+    // For example, if your spinner is index.html in same folder:
+    window.location.href = "index.html";
+  }
+</script>
 
 </body>
 </html>
