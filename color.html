@@ -1,86 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Color Match</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    #buttons button {
-      margin: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    #timer {
-      font-weight: bold;
-      margin-top: 15px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Color Match</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    min-height: 100vh;
+    margin: 0;
+  }
+  #instructionOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    padding: 20px;
+    z-index: 1000;
+  }
+  #instructionOverlay button {
+    margin-top: 20px;
+    padding: 10px 30px;
+    font-size: 18px;
+    border-radius: 6px;
+    border: none;
+    background-color: #ff6f61;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  #instructionOverlay button:hover {
+    background-color: #e65b50;
+  }
+  #targetColor {
+    font-size: 28px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #fff;
+  }
+  #buttons button {
+    margin: 6px;
+    padding: 12px 20px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  #score, #timer {
+    font-size: 22px;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #fff;
+  }
+</style>
 </head>
 <body>
 
-  <h2>Color Match</h2>
-  <p>Click the color shown below!</p>
-  <h3 id="targetColor">Target: </h3>
+<div id="instructionOverlay">
+  <p>Welcome to Color Match!<br/>
+  Click the color name that matches the target color.<br/>
+  You have 45 seconds.<br/>
+  Good luck!</p>
+  <button id="startBtn">OK</button>
+</div>
 
-  <div id="buttons"></div>
+<h2 style="color: white;">Color Match</h2>
+<div id="targetColor"></div>
+<div id="buttons"></div>
+<p id="score">Score: 0</p>
+<p id="timer">⏳ Time: 45s</p>
 
-  <p id="score">Score: 0</p>
-  <p id="timer">⏳ Time: 45s</p>
+<script>
+  const colors = ["Red", "Blue", "Green", "Yellow", "Purple", "Black", "Pink"];
+  let score = 0, time = 45, target = "";
+  let gameStarted = false;
+  let timerInterval;
 
-  <script>
-    const colors = ["Red", "Blue", "Green", "Yellow", "Purple", "Black", "Pink"];
-    let score = 0;
-    let time = 45;
-    let target = "";
+  const overlay = document.getElementById('instructionOverlay');
+  const startBtn = document.getElementById('startBtn');
+  const targetColorEl = document.getElementById('targetColor');
+  const buttonsDiv = document.getElementById('buttons');
+  const scoreEl = document.getElementById('score');
+  const timerEl = document.getElementById('timer');
 
-    // Set a new target color and display shuffled buttons
-    function setColor() {
-      target = colors[Math.floor(Math.random() * colors.length)];
-      document.getElementById("targetColor").innerText = "Target: " + target;
+  // Use sessionStorage to show instructions only once per game session
+  if(sessionStorage.getItem('colorMatchInstructionsShown')) {
+    overlay.style.display = 'none';
+    startGame();
+  }
 
-      // Shuffle colors
-      const shuffledColors = colors
-        .map(value => ({ value, sort: Math.random() }))
-        .sort((a, b) => a.sort - b.sort)
-        .map(({ value }) => value);
+  startBtn.onclick = () => {
+    sessionStorage.setItem('colorMatchInstructionsShown', 'true');
+    overlay.style.display = 'none';
+    startGame();
+  };
 
-      let buttonsHTML = "";
-      shuffledColors.forEach(color => {
-        buttonsHTML += `<button onclick="check('${color}')">${color}</button>`;
-      });
-      document.getElementById("buttons").innerHTML = buttonsHTML;
-    }
-
-    // Check if clicked color matches target
-    function check(color) {
-      if (color === target) {
-        score++;
-        document.getElementById("score").innerText = "Score: " + score;
-      }
-      setColor();
-    }
-
-    // Start game
-    setColor();
-
-    // Timer countdown
-    const timerInterval = setInterval(() => {
-      document.getElementById("timer").innerText = "⏳ Time: " + time + "s";
+  function startGame() {
+    gameStarted = true;
+    score = 0;
+    time = 45;
+    scoreEl.innerText = "Score: 0";
+    timerEl.innerText = `⏳ Time: ${time}s`;
+    generateColor();
+    timerInterval = setInterval(() => {
       time--;
-
+      timerEl.innerText = `⏳ Time: ${time}s`;
       if (time < 0) {
         clearInterval(timerInterval);
-        alert("⏱️ Time's up! Your score: " + score);
-        // Disable buttons after time up
-        document.getElementById("buttons").innerHTML = "";
+        endGame();
       }
     }, 1000);
-  </script>
+  }
+
+  function generateColor() {
+    target = colors[Math.floor(Math.random() * colors.length)];
+    targetColorEl.innerText = "Target: " + target;
+
+    const shuffledColors = colors
+      .map(c => ({c, sort: Math.random()}))
+      .sort((a,b) => a.sort - b.sort)
+      .map(o => o.c);
+
+    buttonsDiv.innerHTML = "";
+    shuffledColors.forEach(color => {
+      const btn = document.createElement('button');
+      btn.textContent = color;
+      btn.style.backgroundColor = color.toLowerCase();
+      btn.style.color = (color.toLowerCase() === "black" ? 'white' : 'black');
+      btn.onclick = () => {
+        if(!gameStarted) return;
+        if(color === target) {
+          score++;
+          scoreEl.innerText = "Score: " + score;
+        }
+        generateColor();
+      };
+      buttonsDiv.appendChild(btn);
+    });
+  }
+
+  function endGame() {
+    gameStarted = false;
+    buttonsDiv.innerHTML = "";
+    targetColorEl.innerText = "⏰ Time's up! Final Score: " + score;
+    // Redirect after 10 seconds
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 10000);
+  }
+</script>
 
 </body>
 </html>
