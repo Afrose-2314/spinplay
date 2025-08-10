@@ -1,39 +1,113 @@
 <!DOCTYPE html>
-<html><head><title>Math Quiz</title></head>
-<body><h2>Game: Math Quiz</h2><p id="question"></p>
-<input type="text" id="answer" /><button onclick="check()">Submit</button>
-<p id="feedback"></p><p>Score: <span id="score">0</span></p><p>Time Left: <span id="time">60</span> seconds</p>
-<script>
-let num1, num2, operator, correctAnswer, score = 0, time = 60;
-const ops = ['+', '-', '*'];
-function generateQuestion() {
-  num1 = Math.floor(Math.random() * 10);
-  num2 = Math.floor(Math.random() * 10);
-  operator = ops[Math.floor(Math.random() * ops.length)];
-  correctAnswer = eval(num1 + operator + num2);
-  document.getElementById('question').innerText = `Solve: ${num1} ${operator} ${num2}`;
-  document.getElementById('answer').value = '';
-  document.getElementById('feedback').innerText = '';
-}
-function check() {
-  const userAns = parseInt(document.getElementById('answer').value);
-  if (userAns === correctAnswer) {
-    score++;
-    document.getElementById('score').innerText = score;
-    document.getElementById('feedback').innerText = "✅ Correct!";
-  } else {
-    document.getElementById('feedback').innerText = "❌ Incorrect!";
-  }
-  setTimeout(generateQuestion, 500);
-}
-const countdown = setInterval(() => {
-  time--;
-  document.getElementById('time').innerText = time;
-  if (time <= 0) {
-    clearInterval(countdown);
-    document.getElementById('question').innerText = "⏰ Time's up!";
-    document.getElementById('answer').disabled = true;
-  }
-}, 1000);
-window.onload = generateQuestion;
-</script></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Math Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #question {
+      font-size: 20px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    input[type="text"] {
+      padding: 5px;
+      font-size: 16px;
+      width: 100px;
+      text-align: center;
+    }
+    button {
+      padding: 6px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    #feedback {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      height: 24px; /* to avoid layout shift */
+    }
+    #score, #time {
+      font-weight: bold;
+      color: #2a9d8f;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Game: Math Quiz</h2>
+
+  <p id="question">Loading question...</p>
+
+  <input type="text" id="answer" autocomplete="off" />
+  <button onclick="checkAnswer()">Submit</button>
+
+  <p id="feedback"></p>
+
+  <p>Score: <span id="score">0</span></p>
+  <p>Time Left: <span id="time">60</span> seconds</p>
+
+  <script>
+    let num1, num2, operator, correctAnswer;
+    let score = 0;
+    let time = 60;
+    const ops = ['+', '-', '*'];
+
+    function generateQuestion() {
+      num1 = Math.floor(Math.random() * 10);
+      num2 = Math.floor(Math.random() * 10);
+      operator = ops[Math.floor(Math.random() * ops.length)];
+
+      // Compute correct answer
+      switch(operator) {
+        case '+': correctAnswer = num1 + num2; break;
+        case '-': correctAnswer = num1 - num2; break;
+        case '*': correctAnswer = num1 * num2; break;
+      }
+
+      document.getElementById('question').innerText = `Solve: ${num1} ${operator} ${num2}`;
+      document.getElementById('answer').value = '';
+      document.getElementById('feedback').innerText = '';
+      document.getElementById('answer').focus();
+    }
+
+    function checkAnswer() {
+      const userAns = parseInt(document.getElementById('answer').value);
+      if (isNaN(userAns)) {
+        document.getElementById('feedback').innerText = "⚠️ Please enter a valid number.";
+        return;
+      }
+
+      if (userAns === correctAnswer) {
+        score++;
+        document.getElementById('score').innerText = score;
+        document.getElementById('feedback').innerText = "✅ Correct!";
+      } else {
+        document.getElementById('feedback').innerText = "❌ Incorrect!";
+      }
+
+      setTimeout(generateQuestion, 700);
+    }
+
+    const countdown = setInterval(() => {
+      time--;
+      document.getElementById('time').innerText = time;
+
+      if (time <= 0) {
+        clearInterval(countdown);
+        document.getElementById('question').innerText = "⏰ Time's up!";
+        document.getElementById('answer').disabled = true;
+        document.getElementById('feedback').innerText = '';
+      }
+    }, 1000);
+
+    window.onload = generateQuestion;
+  </script>
+
+</body>
+</html>
