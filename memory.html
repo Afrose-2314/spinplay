@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,6 +16,7 @@
       gap: 10px;
       justify-content: center;
       margin: 30px auto;
+      user-select: none;
     }
     .card {
       width: 100px;
@@ -30,6 +29,7 @@
       cursor: pointer;
       transition: background 0.3s;
       border-radius: 10px;
+      pointer-events: auto;
     }
     .flipped {
       background-color: #fff;
@@ -37,6 +37,7 @@
     .matched {
       background-color: #81c784;
       cursor: default;
+      pointer-events: none;
     }
     .result {
       font-size: 1.5em;
@@ -70,27 +71,32 @@
   <div class="result" id="resultText"></div>
 
   <script>
-    const emojis = ['🍎','🍌','🍇','🍉','🍓','🍒','🥝','🍍','🍈','🍊'];
+    const emojis = ['❤️','🩷','🧡','💛','💚','💙','🩵','💜','🤎','🖤','🩶','🤍'];
     let cards = emojis.concat(emojis);
     cards.sort(() => 0.5 - Math.random());
-    let first = null, second = null, matched = 0, time = 60;
+
+    let first = null, second = null, matched = 0, time = 60, gameEnded = false;
 
     const board = document.getElementById("board");
     const scoreDisplay = document.getElementById("score");
     const resultText = document.getElementById("resultText");
 
+    // Create cards
     cards.forEach((emoji, i) => {
       const card = document.createElement("div");
       card.className = "card";
       card.dataset.emoji = emoji;
       card.dataset.index = i;
       card.innerText = "";
-      card.addEventListener("click", () => flipCard(card));
+      card.addEventListener("click", () => {
+        if (!gameEnded) flipCard(card);
+      });
       board.appendChild(card);
     });
 
     function flipCard(card) {
       if (card.classList.contains("flipped") || card.classList.contains("matched")) return;
+
       card.classList.add("flipped");
       card.innerText = card.dataset.emoji;
 
@@ -98,12 +104,14 @@
         first = card;
       } else if (!second && card !== first) {
         second = card;
+
         if (first.dataset.emoji === second.dataset.emoji) {
           first.classList.add("matched");
           second.classList.add("matched");
           matched++;
           scoreDisplay.innerText = "Matches: " + matched;
           first = second = null;
+
           if (matched === emojis.length) endGame(true);
         } else {
           setTimeout(() => {
@@ -118,12 +126,13 @@
     }
 
     function endGame(won) {
-      clearInterval(timer);
+      gameEnded = true;
+      clearInterval(timerInterval);
       resultText.className = "result " + (won ? "winner" : "loser");
       resultText.innerText = won ? "🎉 You Win!" : "😢 Time's up!";
     }
 
-    const timer = setInterval(() => {
+    const timerInterval = setInterval(() => {
       document.getElementById("timer").innerText = "⏳ Time: " + time-- + "s";
       if (time < 0) endGame(false);
     }, 1000);
