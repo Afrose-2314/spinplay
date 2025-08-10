@@ -1,88 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Guess Game</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    input[type="number"] {
-      width: 80px;
-      padding: 5px;
-      font-size: 16px;
-    }
-    button {
-      padding: 6px 12px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    #result {
-      margin-top: 15px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    #timer {
-      font-weight: bold;
-      color: #d9534f;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Guess Game</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #c3ec52 0%, #0ba29d 100%);
+    min-height: 100vh;
+    margin: 0;
+  }
+  #instructionOverlay {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.75);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    padding: 20px;
+    z-index: 1000;
+  }
+  #instructionOverlay button {
+    margin-top: 20px;
+    padding: 10px 30px;
+    font-size: 18px;
+    border-radius: 6px;
+    border: none;
+    background-color: #0984e3;
+    color: white;
+    cursor: pointer;
+  }
+  #instructionOverlay button:hover {
+    background-color: #0652dd;
+  }
+  input, button {
+    font-size: 18px;
+    padding: 8px;
+    margin: 10px 5px 0 0;
+    border-radius: 6px;
+    border: none;
+  }
+  #result, #timer, #score {
+    font-weight: bold;
+    font-size: 20px;
+    margin-top: 15px;
+    color: white;
+  }
+</style>
 </head>
 <body>
 
-  <h2>Game: Guess the Number (1-100)</h2>
+<div id="instructionOverlay">
+  <p>Welcome to Guess Game!<br />
+  Guess the secret number between 1 and 100.<br />
+  You have 60 seconds.<br />
+  Use Submit button or press Enter to submit your guess.<br />
+  Good luck!</p>
+  <button id="startBtn">OK</button>
+</div>
 
-  <input type="number" id="guess" min="1" max="100" />
-  <button onclick="checkGuess()">Submit</button>
+<h2 style="color: white;">Game: Guess the Number (1-100)</h2>
 
-  <p id="result"></p>
-  <p>Time left: <span id="timer">60</span> seconds</p>
+<input type="number" id="guessInput" min="1" max="100" />
+<button id="submitBtn">Submit</button>
 
-  <script>
-    const answer = Math.floor(Math.random() * 100) + 1;
-    let timeLeft = 60;
-    let gameOver = false;
+<p id="result"></p>
+<p id="timer">Time left: 60</p>
 
-    const timer = setInterval(() => {
-      timeLeft--;
-      document.getElementById("timer").innerText = timeLeft;
-      if (timeLeft <= 0) {
-        clearInterval(timer);
-        document.getElementById("result").innerText = "⏰ Time's up! The number was " + answer;
-        gameOver = true;
-        disableInput();
+<script>
+  const overlay = document.getElementById('instructionOverlay');
+  const startBtn = document.getElementById('startBtn');
+  const guessInput = document.getElementById('guessInput');
+  const submitBtn = document.getElementById('submitBtn');
+  const resultEl = document.getElementById('result');
+  const timerEl = document.getElementById('timer');
+
+  let answer, time, timerInterval, gameStarted = false;
+
+  if(sessionStorage.getItem('guessInstructionsShown')) {
+    overlay.style.display = 'none';
+    startGame();
+  }
+
+  startBtn.onclick = () => {
+    sessionStorage.setItem('guessInstructionsShown', 'true');
+    overlay.style.display = 'none';
+    startGame();
+  };
+
+  function startGame() {
+    gameStarted = true;
+    answer = Math.floor(Math.random() * 100) + 1;
+    time = 60;
+    timerEl.innerText = "Time left: " + time;
+    resultEl.innerText = "";
+    guessInput.disabled = false;
+    submitBtn.disabled = false;
+    guessInput.value = "";
+    guessInput.focus();
+
+    timerInterval = setInterval(() => {
+      time--;
+      timerEl.innerText = "Time left: " + time;
+      if (time < 0) {
+        clearInterval(timerInterval);
+        endGame(false);
       }
     }, 1000);
+  }
 
-    function disableInput() {
-      document.getElementById("guess").disabled = true;
+  function checkGuess() {
+    if (!gameStarted) return;
+    const guess = parseInt(guessInput.value);
+    if (isNaN(guess) || guess < 1 || guess > 100) {
+      resultEl.innerText = "⚠️ Enter a number between 1 and 100";
+      return;
     }
 
-    function checkGuess() {
-      if (gameOver) return;  // Prevent input after game is over
-
-      const guessInput = document.getElementById("guess");
-      const guess = parseInt(guessInput.value);
-
-      if (isNaN(guess) || guess < 1 || guess > 100) {
-        document.getElementById("result").innerText = "⚠️ Please enter a number between 1 and 100.";
-        return;
-      }
-
-      if (guess === answer) {
-        clearInterval(timer);
-        document.getElementById("result").innerText = "🎉 Correct!";
-        gameOver = true;
-        disableInput();
-      } else if (guess < answer) {
-        document.getElementById("result").innerText = "🔼 Too Low!";
-      } else {
-        document.getElementById("result").innerText = "🔽 Too High!";
-      }
+    if (guess === answer) {
+      clearInterval(timerInterval);
+      resultEl.innerText = "🎉 Correct!";
+      endGame(true);
+    } else if (guess < answer) {
+      resultEl.innerText = "🔼 Too Low!";
+    } else {
+      resultEl.innerText = "🔽 Too High!";
     }
-  </script>
+  }
+
+  submitBtn.onclick = checkGuess;
+
+  guessInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') checkGuess();
+  });
+
+  function endGame(won) {
+    gameStarted = false;
+    guessInput.disabled = true;
+    submitBtn.disabled = true;
+    if(!won) {
+      resultEl.innerText = `⏰ Time's up! The number was ${answer}`;
+    }
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 10000);
+  }
+</script>
 
 </body>
 </html>
