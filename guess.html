@@ -1,29 +1,88 @@
 <!DOCTYPE html>
-<html><head><title>Guess Game</title></head>
-<body><h2>Game: Guess the Number (1-100)</h2>
-<input type="number" id="guess" min="1" max="100"/>
-<button onclick="checkGuess()">Submit</button>
-<p id="result"></p><p>Time left: <span id="timer">60</span> seconds</p>
-<script>
-const answer = Math.floor(Math.random() * 100) + 1;
-let timeLeft = 60;
-const timer = setInterval(() => {
-  timeLeft--;
-  document.getElementById("timer").innerText = timeLeft;
-  if (timeLeft <= 0) {
-    clearInterval(timer);
-    document.getElementById("result").innerText = "⏰ Time's up! The number was " + answer;
-  }
-}, 1000);
-function checkGuess() {
-  const guess = parseInt(document.getElementById("guess").value);
-  if (guess === answer) {
-    clearInterval(timer);
-    document.getElementById("result").innerText = "🎉 Correct!";
-  } else if (guess < answer) {
-    document.getElementById("result").innerText = "🔼 Too Low!";
-  } else {
-    document.getElementById("result").innerText = "🔽 Too High!";
-  }
-}
-</script></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Guess Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 5px;
+      font-size: 16px;
+    }
+    button {
+      padding: 6px 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #timer {
+      font-weight: bold;
+      color: #d9534f;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Game: Guess the Number (1-100)</h2>
+
+  <input type="number" id="guess" min="1" max="100" />
+  <button onclick="checkGuess()">Submit</button>
+
+  <p id="result"></p>
+  <p>Time left: <span id="timer">60</span> seconds</p>
+
+  <script>
+    const answer = Math.floor(Math.random() * 100) + 1;
+    let timeLeft = 60;
+    let gameOver = false;
+
+    const timer = setInterval(() => {
+      timeLeft--;
+      document.getElementById("timer").innerText = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        document.getElementById("result").innerText = "⏰ Time's up! The number was " + answer;
+        gameOver = true;
+        disableInput();
+      }
+    }, 1000);
+
+    function disableInput() {
+      document.getElementById("guess").disabled = true;
+    }
+
+    function checkGuess() {
+      if (gameOver) return;  // Prevent input after game is over
+
+      const guessInput = document.getElementById("guess");
+      const guess = parseInt(guessInput.value);
+
+      if (isNaN(guess) || guess < 1 || guess > 100) {
+        document.getElementById("result").innerText = "⚠️ Please enter a number between 1 and 100.";
+        return;
+      }
+
+      if (guess === answer) {
+        clearInterval(timer);
+        document.getElementById("result").innerText = "🎉 Correct!";
+        gameOver = true;
+        disableInput();
+      } else if (guess < answer) {
+        document.getElementById("result").innerText = "🔼 Too Low!";
+      } else {
+        document.getElementById("result").innerText = "🔽 Too High!";
+      }
+    }
+  </script>
+
+</body>
+</html>
