@@ -50,7 +50,7 @@
     width: 100px;
     height: 100px;
     background-color: #ccc;
-    font-size: 2em;
+    font-size: 3em;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -121,4 +121,124 @@
 
   const emojis = ['🤍','🤎','💜','❤️','🩷','🧡','💛','💚','💙','🩵'];
   let cards = emojis.concat(emojis);
-  let first = null, second
+
+  let firstCard = null;
+  let secondCard = null;
+  let matchedCount = 0;
+  let timeLeft = 60;
+  let timerInterval = null;
+  let busy = false;
+  let gameStarted = false;
+
+  // Shuffle cards
+  function shuffle(array) {
+    for(let i = array.length -1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  function createBoard() {
+    board.innerHTML = '';
+    cards.forEach((emoji, index) => {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.dataset.emoji = emoji;
+      card.dataset.index = index;
+      card.innerText = '';
+      card.addEventListener('click', () => flipCard(card));
+      board.appendChild(card);
+    });
+  }
+
+  function flipCard(card) {
+    if (busy || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+    card.classList.add('flipped');
+    card.innerText = card.dataset.emoji;
+
+    if (!firstCard) {
+      firstCard = card;
+    } else if (!secondCard && card !== firstCard) {
+      secondCard = card;
+      busy = true;
+
+      if (firstCard.dataset.emoji === secondCard.dataset.emoji) {
+        firstCard.classList.add('matched');
+        secondCard.classList.add('matched');
+        matchedCount++;
+        scoreDisplay.innerText = `Matches: ${matchedCount}`;
+        firstCard = null;
+        secondCard = null;
+        busy = false;
+
+        if (matchedCount === emojis.length) {
+          endGame(true);
+        }
+      } else {
+        setTimeout(() => {
+          firstCard.classList.remove('flipped');
+          secondCard.classList.remove('flipped');
+          firstCard.innerText = '';
+          secondCard.innerText = '';
+          firstCard = null;
+          secondCard = null;
+          busy = false;
+        }, 800);
+      }
+    }
+  }
+
+  function startTimer() {
+    timerDisplay.innerText = `⏳ Time: ${timeLeft}s`;
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timerDisplay.innerText = `⏳ Time: ${timeLeft}s`;
+      if (timeLeft < 0) {
+        clearInterval(timerInterval);
+        endGame(false);
+      }
+    }, 1000);
+  }
+
+  function endGame(won) {
+    gameStarted = false;
+    clearInterval(timerInterval);
+    board.querySelectorAll('.card').forEach(card => card.removeEventListener('click', () => flipCard(card)));
+    resultText.className = won ? "result winner" : "result loser";
+    resultText.innerText = won ? "🎉 You Win!" : "⏰ Time's up!";
+    // Disable further clicks
+    board.querySelectorAll('.card').forEach(card => card.style.pointerEvents = 'none');
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 10000);
+  }
+
+  startBtn.onclick = () => {
+    // show instructions only once per session
+    if(!sessionStorage.getItem('memoryInstructionsShown')) {
+      sessionStorage.setItem('memoryInstructionsShown', 'true');
+    }
+    overlay.style.display = 'none';
+    initGame();
+  };
+
+  // If instructions already seen, start immediately
+  if(sessionStorage.getItem('memoryInstructionsShown')) {
+    overlay.style.display = 'none';
+    initGame();
+  }
+
+  function initGame() {
+    gameStarted = true;
+    timeLeft = 60;
+    matchedCount = 0;
+    scoreDisplay.innerText = `Matches: 0`;
+    resultText.innerText = '';
+    shuffle(cards);
+    createBoard();
+    startTimer();
+  }
+</script>
+
+</body>
+</html>
