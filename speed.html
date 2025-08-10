@@ -1,41 +1,84 @@
-
-
 <!DOCTYPE html>
-<html>
-<head><title>Typing Test</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Typing Speed Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #sentence {
+      font-size: 24px;
+      margin-bottom: 15px;
+      font-weight: bold;
+      min-height: 40px;
+    }
+    #input {
+      padding: 8px;
+      font-size: 18px;
+      width: 300px;
+      text-align: center;
+    }
+    #score, #timer {
+      font-size: 18px;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
 <body>
-<h2>Typing Speed Test</h2>
-<p id="sentence"></p>
-<input type="text" id="input" oninput="checkTyping()" />
-<p id="score">Correct: 0</p>
-<p id="timer"></p>
-<script>
-const sentences = ["Hello world", "Practice makes perfect", "JavaScript is fun", "Spin the wheel", "Typing is cool"];
-let score = 0, time = 60, current;
 
-function newSentence() {
-  current = sentences[Math.floor(Math.random() * sentences.length)];
-  document.getElementById("sentence").innerText = current;
-  document.getElementById("input").value = "";
-}
+  <h2>Typing Speed Test</h2>
 
-function checkTyping() {
-  if (document.getElementById("input").value === current) {
-    score++;
-    document.getElementById("score").innerText = "Correct: " + score;
+  <p id="sentence">Loading...</p>
+  <input type="text" id="input" autocomplete="off" placeholder="Type here..." oninput="checkTyping()" />
+  <p id="score">Correct: 0</p>
+  <p id="timer">⏳ Time: 60s</p>
+
+  <script>
+    const sentences = [
+      "Hello world",
+      "Practice makes perfect",
+      "JavaScript is fun",
+      "Spin the wheel",
+      "Typing is cool"
+    ];
+
+    let score = 0;
+    let time = 60;
+    let currentSentence = "";
+
+    function newSentence() {
+      currentSentence = sentences[Math.floor(Math.random() * sentences.length)];
+      document.getElementById("sentence").innerText = currentSentence;
+      document.getElementById("input").value = "";
+      document.getElementById("input").focus();
+    }
+
+    function checkTyping() {
+      const userInput = document.getElementById("input").value;
+      if (userInput === currentSentence) {
+        score++;
+        document.getElementById("score").innerText = "Correct: " + score;
+        newSentence();
+      }
+    }
+
     newSentence();
-  }
-}
 
-newSentence();
+    const timerInterval = setInterval(() => {
+      document.getElementById("timer").innerText = "⏳ Time: " + time + "s";
+      time--;
 
-let interval = setInterval(() => {
-  document.getElementById("timer").innerText = "⏳ Time: " + time-- + "s";
-  if (time < 0) {
-    clearInterval(interval);
-    alert("⏱️ Time's up! Your score: " + score);
-  }
-}, 1000);
-</script>
+      if (time < 0) {
+        clearInterval(timerInterval);
+        alert("⏱️ Time's up! Your score: " + score);
+        document.getElementById("input").disabled = true;
+      }
+    }, 1000);
+  </script>
+
 </body>
 </html>
