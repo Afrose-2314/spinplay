@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login - Spin Play Enjoy</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
   <style>
+    /* Basic reset and font */
     * {
       margin: 0;
       padding: 0;
@@ -13,6 +14,7 @@
       font-family: 'Poppins', sans-serif;
     }
 
+    /* Full screen gradient background and center content */
     body {
       height: 100vh;
       background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
@@ -21,14 +23,15 @@
       align-items: center;
     }
 
+    /* Login container styling */
     .login-container {
-      background-color: white;
+      background-color: #fff;
       padding: 40px;
       border-radius: 15px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
       width: 300px;
       text-align: center;
-      animation: fadeIn 1.5s ease-in-out;
+      animation: fadeIn 1.2s ease-in-out;
     }
 
     .login-container h2 {
@@ -40,19 +43,22 @@
       width: 100%;
       padding: 10px;
       margin: 10px 0;
-      border-radius: 5px;
       border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
     }
 
     .login-container button {
       width: 100%;
       padding: 10px;
+      margin-top: 10px;
       background-color: #f6d365;
       border: none;
       border-radius: 5px;
       font-weight: bold;
+      color: #333;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s;
     }
 
     .login-container button:hover {
@@ -61,14 +67,15 @@
 
     .credits {
       margin-top: 20px;
-      font-size: 0.9em;
+      font-size: 0.85em;
       color: #555;
     }
 
+    /* Fade-in animation */
     @keyframes fadeIn {
       from {
         opacity: 0;
-        transform: translateY(-50px);
+        transform: translateY(-30px);
       }
       to {
         opacity: 1;
@@ -80,19 +87,20 @@
 <body>
   <div class="login-container">
     <h2>Login</h2>
-    <input type="text" id="username" placeholder="Enter username">
-    <input type="password" id="password" placeholder="Enter password">
+    <input type="text" id="username" placeholder="Enter username" />
+    <input type="password" id="password" placeholder="Enter password" />
     <button onclick="login()">Login</button>
     <div class="credits">
-      Made by Afrose, Bharathi, Dharshini<br>
+      Made by Afrose, Bharathi, Dharshini<br />
       III BCA B
     </div>
   </div>
 
   <script>
     function login() {
-      let user = document.getElementById('username').value.trim();
-      let pass = document.getElementById('password').value.trim();
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+
       if (user && pass === '12345678') {
         sessionStorage.setItem('sp_user', user);
         window.location.href = 'index.html';
