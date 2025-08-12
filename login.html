@@ -1,29 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login - Spin Play Enjoy</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Spin Play Enjoy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      width: 300px;
+      text-align: center;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    .login-container h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #f6d365;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .login-container button:hover {
+      background-color: #fda085;
+    }
+
+    .credits {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
-<body class=" background: linear-gradient(135deg, #f6d365 0%, #fda085 100%)">
-<div class="login-container">
-  <h2>Login</h2>
-  <input type="text" id="username" placeholder="Enter username">
-  <input type="password" id="password" placeholder="Enter password">
-  <button onclick="login()">Login</button>
-</div>
-<script>
-function login(){
-  let user = document.getElementById('username').value.trim();
-  let pass = document.getElementById('password').value.trim();
-  if(user && pass === '12345678'){
-    sessionStorage.setItem('sp_user', user);
-    window.location.href='index.html';
-  } else {
-    alert('Invalid credentials. Password is 12345678');
-  }
-}
-</script>
+<body>
+  <div class="login-container">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Enter username">
+    <input type="password" id="password" placeholder="Enter password">
+    <button onclick="login()">Login</button>
+    <div class="credits">
+      Made by Afrose, Bharathi, Dharshini<br>
+      III BCA B
+    </div>
+  </div>
+
+  <script>
+    function login() {
+      let user = document.getElementById('username').value.trim();
+      let pass = document.getElementById('password').value.trim();
+      if (user && pass === '12345678') {
+        sessionStorage.setItem('sp_user', user);
+        window.location.href = 'index.html';
+      } else {
+        alert('Invalid credentials. Password is 12345678');
+      }
+    }
+  </script>
 </body>
 </html>
